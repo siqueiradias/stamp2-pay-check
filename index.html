@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stamp 2 Pay Check</title>
+
+<!--
+  Stamp 2 Pay Check - prototype
+  Project Skills & Professionalism (CA2) - CCT College Dublin
+
+  What this page does:
+    1. Checks if one pay period (weekly, fortnightly or monthly)
+       reaches the national minimum wage
+    2. Explains the deductions on a payslip (PAYE, USC, PRSI,
+       MyFutureFund and other deductions) and the extra payments
+       (Sunday premium, overtime, holiday pay, tips...)
+    3. Checks the hours of each week against the Stamp 2 limit
+    4. Tells the user which organisation to contact
+
+  The user can type the total of the period, or the hours and pay
+  of each day one by one.
+
+  Privacy by design: everything is calculated in the browser.
+  Files: index.html (structure), style.css (appearance), script.js (logic).
+
+  We do not use a server, cookies or localStorage, so no personal
+  data is stored or sent anywhere.
+-->
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div class="page">
+
+  <header>
+    <h1 data-text="title"></h1>
+    <p data-text="subtitle"></p>
+    <div class="language-buttons">
+      <button type="button" id="btn-en" onclick="setLanguage('en')">English</button>
+      <button type="button" id="btn-pt" onclick="setLanguage('pt')">Português</button>
+    </div>
+  </header>
+
+  <main>
+    <p data-text="privacy"></p>
+
+    <!-- ================= FORM ================= -->
+    <h2 data-text="formTitle"></h2>
+
+    <label for="age" data-text="ageLabel"></label>
+    <select id="age">
+      <option value="adult" data-text="ageAdult"></option>
+      <option value="age19" data-text="age19"></option>
+      <option value="age18" data-text="age18"></option>
+      <option value="under18" data-text="ageUnder18"></option>
+    </select>
+
+    <!-- How often the person is paid -->
+    <label for="period" data-text="periodLabel"></label>
+    <p class="hint" data-text="periodHint"></p>
+    <select id="period" onchange="updatePeriod()">
+      <option value="weekly" data-text="periodWeekly"></option>
+      <option value="fortnightly" data-text="periodFortnightly"></option>
+      <option value="monthly" data-text="periodMonthly"></option>
+    </select>
+
+    <label for="startDate" data-text="dateLabel"></label>
+    <p class="hint" data-text="dateHint"></p>
+    <input type="date" id="startDate" onchange="updatePeriod()">
+    <!-- Shows the first and last day of the period once a date is chosen -->
+    <p id="periodInfo" class="period-info"></p>
+
+    <!-- Total of the period, or each day one by one -->
+    <fieldset class="choice">
+      <legend data-text="modeLabel"></legend>
+      <label class="radio">
+        <input type="radio" name="mode" value="total" checked onchange="setMode()">
+        <span data-text="modeTotal"></span>
+      </label>
+      <label class="radio">
+        <input type="radio" name="mode" value="daily" onchange="setMode()">
+        <span data-text="modeDaily"></span>
+      </label>
+    </fieldset>
+
+    <!-- Option 1: total of the period -->
+    <div id="totalEntry">
+      <label for="hours" data-text="hoursLabel"></label>
+      <p class="hint" data-text="hoursHint"></p>
+      <input type="number" id="hours" min="0" step="0.25" inputmode="decimal">
+
+      <label for="gross" data-text="grossLabel"></label>
+      <p class="hint" data-text="grossHint"></p>
+      <input type="number" id="gross" min="0" step="0.01" inputmode="decimal">
+    </div>
+
+    <!-- Option 2: each day one by one. The rows are created by script.js -->
+    <div id="dailyEntry" hidden>
+      <p class="hint" data-text="dailyHint"></p>
+      <div id="dayList"></div>
+      <p id="dailyTotals" class="daily-totals"></p>
+    </div>
+
+    <!-- The payslip details are hidden by default so the main form stays short.
+         <details> opens and closes without any JavaScript. -->
+    <details id="payslipDetails">
+    <summary data-text="detailsToggle"></summary>
+    <p class="hint" data-text="detailsHint"></p>
+
+    <!-- Other payments: Sunday premium, overtime, holiday pay, tips... Lines are created by script.js -->
+    <h3 class="deductions-title" data-text="extraPayTitle"></h3>
+    <p class="hint" data-text="extraPayHint"></p>
+    <div id="extraPayments"></div>
+    <button type="button" class="add-button" onclick="addExtra('payment')" data-text="addPayment"></button>
+
+    <h3 class="deductions-title" data-text="deductionsTitle"></h3>
+    <p class="hint" data-text="deductionsHint"></p>
+    <div class="deduction-columns">
+      <div>
+        <label for="paye">PAYE (€)</label>
+        <input type="number" id="paye" min="0" step="0.01" inputmode="decimal">
+      </div>
+      <div>
+        <label for="usc">USC (€)</label>
+        <input type="number" id="usc" min="0" step="0.01" inputmode="decimal">
+      </div>
+      <div>
+        <label for="prsi">PRSI (€)</label>
+        <input type="number" id="prsi" min="0" step="0.01" inputmode="decimal">
+      </div>
+      <div>
+        <!-- On the payslip it can appear as "MyFuture Fund EE" -->
+        <label for="myfuture">MyFutureFund (€)</label>
+        <input type="number" id="myfuture" min="0" step="0.01" inputmode="decimal">
+      </div>
+    </div>
+
+    <!-- Other deductions: uniform, equipment or meals, or other -->
+    <h4 class="extra-title" data-text="extraDedTitle"></h4>
+    <p class="hint" data-text="extraDedHint"></p>
+    <div id="extraDeductions"></div>
+    <button type="button" class="add-button" onclick="addExtra('deduction')" data-text="addDeduction"></button>
+    </details>
+
+    <div class="form-buttons">
+      <button type="button" class="main" onclick="checkPay()" data-text="checkButton"></button>
+      <button type="button" onclick="clearForm()" data-text="clearButton"></button>
+    </div>
+
+    <!-- ================= RESULTS ================= -->
+    <!-- aria-live makes screen readers announce the result when it appears -->
+    <div id="results" aria-live="polite"></div>
+  </main>
+
+  <footer>
+    <p data-text="disclaimer"></p>
+    <p data-text="sources"></p>
+    <ul>
+      <li><a href="https://www.workplacerelations.ie" target="_blank" rel="noopener">Workplace Relations Commission (WRC)</a></li>
+      <li><a href="https://www.revenue.ie" target="_blank" rel="noopener">Revenue</a></li>
+      <li><a href="https://www.citizensinformation.ie" target="_blank" rel="noopener">Citizens Information</a></li>
+      <li><a href="https://www.irishimmigration.ie" target="_blank" rel="noopener">Immigration Service Delivery (ISD)</a></li>
+      <li><a href="https://revisedacts.lawreform.ie/eli/2000/act/5/schedule/1/revised/en/html" target="_blank" rel="noopener">National Minimum Wage Act 2000, Schedule 1 (what counts for the minimum wage)</a></li>
+      <li><a href="https://www.myfuturefund.ie" target="_blank" rel="noopener">MyFutureFund (official website)</a></li>
+      <li><a href="https://www.gov.ie/en/department-of-social-protection/publications/myfuturefund-contribution-examples-for-employees" target="_blank" rel="noopener">MyFutureFund (Department of Social Protection)</a></li>
+    </ul>
+    <p data-text="credits"></p>
+  </footer>
+
+</div>
+
+<!-- The script is loaded at the end so the page elements already exist -->
+<script src="script.js"></script>
+</body>
+</html>

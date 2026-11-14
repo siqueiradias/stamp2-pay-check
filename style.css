@@ -1,0 +1,184 @@
+/*
+  Stamp 2 Pay Check - styles
+  Colours: only blue, white and black (plus one grey for borders)
+*/
+
+/* The page is always light: white background, black text */
+:root {
+  color-scheme: light;
+  --blue: #0b4f9e;
+  --black: #000000;
+  --white: #ffffff;
+  --grey: #c9ced6;
+  --light-blue: #eaf1fa;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--black);
+  background: var(--white);
+  margin: 0;
+}
+
+/* Page is one centred column so it also works on a phone */
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+header {
+  border-bottom: 3px solid var(--blue);
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+h1 { font-size: 28px; margin: 0 0 4px 0; color: var(--blue); }
+h2 { font-size: 20px; margin: 28px 0 8px 0; }
+h3 { font-size: 17px; margin: 0 0 4px 0; }
+p  { margin: 0 0 10px 0; }
+a  { color: var(--blue); }
+
+.language-buttons { margin-top: 10px; }
+
+button {
+  font-family: inherit;
+  font-size: 16px;
+  padding: 8px 14px;
+  border: 2px solid var(--blue);
+  background: var(--white);
+  color: var(--blue);
+  cursor: pointer;
+}
+
+/* The main button and the selected language are filled blue */
+button.main, button.selected {
+  background: var(--blue);
+  color: var(--white);
+}
+
+button:focus, input:focus, select:focus {
+  outline: 3px solid var(--black);
+  outline-offset: 2px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-top: 14px;
+}
+
+.hint { font-size: 14px; margin: 0 0 4px 0; }
+
+input, select {
+  font-family: inherit;
+  font-size: 16px;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--black);
+  background: var(--white);
+  color: var(--black);
+}
+
+/* The deduction fields sit side by side on wide screens
+   and two by two on a phone */
+.deduction-columns { display: flex; gap: 12px; flex-wrap: wrap; }
+.deduction-columns div { flex: 1; min-width: 140px; }
+
+.form-buttons { margin-top: 20px; display: flex; gap: 10px; }
+
+/* Result boxes */
+.result {
+  border: 1px solid var(--grey);
+  border-left: 6px solid var(--blue);
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+/* A result that needs attention gets a black border and a pale background */
+.result.attention {
+  border-left-color: var(--black);
+  background: var(--light-blue);
+}
+
+.error { font-weight: bold; border: 2px solid var(--black); padding: 10px; }
+
+ul { margin: 0 0 10px 0; padding-left: 20px; }
+
+footer {
+  border-top: 1px solid var(--grey);
+  margin-top: 32px;
+  padding-top: 12px;
+  font-size: 14px;
+}
+
+/* Title of the optional deductions part of the form */
+.deductions-title { margin-top: 22px; }
+
+/* ---------- Pay period and entry mode ---------- */
+
+/* Line that shows the first and last day of the period */
+.period-info { margin-top: 6px; font-size: 14px; color: var(--blue); }
+
+/* Box with the two options: total or day by day */
+fieldset.choice {
+  border: 1px solid var(--grey);
+  margin: 18px 0 0 0;
+  padding: 8px 12px 12px 12px;
+}
+fieldset.choice legend { font-weight: bold; padding: 0 4px; }
+
+/* Radio buttons: normal text, side by side, small circle (not 100% wide) */
+label.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: normal;
+  margin: 6px 20px 0 0;
+  cursor: pointer;
+}
+label.radio input { width: auto; margin: 0; }
+
+/* ---------- Day by day table ---------- */
+
+/* The table scrolls inside its box on very small screens */
+.day-scroll { overflow-x: auto; margin-top: 8px; }
+
+.day-table { width: 100%; border-collapse: collapse; }
+.day-table th, .day-table td {
+  padding: 4px 6px;
+  text-align: left;
+  border-bottom: 1px solid var(--grey);
+}
+.day-table thead th { font-size: 14px; }
+.day-table td:first-child { white-space: nowrap; }
+.day-table input { padding: 6px; min-width: 80px; }
+
+/* The row that starts each week */
+.day-table tr.week-row th {
+  background: var(--light-blue);
+  color: var(--blue);
+  font-size: 14px;
+}
+
+.daily-totals { font-weight: bold; margin-top: 8px; }
+
+/* ---------- Other payments and other deductions ---------- */
+
+.extra-title { font-size: 16px; margin: 18px 0 4px 0; }
+
+/* One line: type, amount and Remove. On a phone it wraps into two lines */
+.extra-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.extra-row select { flex: 3; min-width: 200px; }
+.extra-row input { flex: 1; min-width: 100px; }
+
+.add-button { margin-top: 8px; }
+
+/* The "Add details from your payslip" part, closed by default */
+details { margin-top: 22px; border: 1px solid var(--grey); padding: 10px 12px; }
+summary { cursor: pointer; font-weight: bold; color: var(--blue); }
+details[open] summary { margin-bottom: 8px; }
