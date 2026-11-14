@@ -196,7 +196,8 @@ var TEXTS = {
     weekPartial: "Only {days} days of this week are in the period.",
     hoursTerm: "This period is in term time, so the limit is 20 hours per week.",
     hoursHoliday: "This period is in a holiday period (1 June to 30 September, or 15 December to 15 January), so the limit is 40 hours per week.",
-    hoursMixed: "This period has weeks in term time (limit 20 hours) and weeks in a holiday period (limit 40 hours). Each week uses the limit of its first day.",
+    hoursMixed: "This period has weeks in term time (limit 20 hours) and weeks in a holiday period (limit 40 hours). A week only gets the 40-hour limit when every day of it is in a holiday period.",
+    hoursPartWeek: "Part of a week is in a holiday period and part is in term time. To be safe, we use the 20-hour limit for that week. If you are not sure, ask Immigration Service Delivery (ISD).",
     hoursWarning: "Working over the limit can put your immigration permission at risk. This page does not save or share this information.",
     dedTitle: "Your deductions",
     dedSummary: "Total deductions: {total}. Estimated net pay: {net}.",
@@ -327,7 +328,8 @@ var TEXTS = {
     weekPartial: "Só {days} dias desta semana estão no período.",
     hoursTerm: "Este período está no período de aulas, então o limite é de 20 horas por semana.",
     hoursHoliday: "Este período está nas férias (1 de junho a 30 de setembro, ou 15 de dezembro a 15 de janeiro), então o limite é de 40 horas por semana.",
-    hoursMixed: "Este período tem semanas de aulas (limite de 20 horas) e semanas de férias (limite de 40 horas). Cada semana usa o limite do seu primeiro dia.",
+    hoursMixed: "Este período tem semanas de aulas (limite de 20 horas) e semanas de férias (limite de 40 horas). Uma semana só tem o limite de 40 horas quando todos os dias dela estão em período de férias.",
+    hoursPartWeek: "Uma parte da semana está nas férias e outra no período de aulas. Por segurança, usamos o limite de 20 horas para essa semana. Em caso de dúvida, consulte a Immigration Service Delivery (ISD).",
     hoursWarning: "Trabalhar acima do limite pode colocar sua permissão de imigração em risco. Esta página não salva nem compartilha essa informação.",
     dedTitle: "Seus descontos",
     dedSummary: "Total de descontos: {total}. Pagamento líquido estimado: {net}.",
@@ -509,7 +511,8 @@ function getMyFutureFundRule(dateText) {
 
 // Returns true if the date is inside one of the Stamp 2 holiday periods:
 // 1 June to 30 September, or 15 December to 15 January.
-// Limitation: for each week we only look at its first day.
+// A week only counts as holiday when every one of its days is in one
+// of these periods (see calculate), so mixed weeks use the safer 20 hours.
 function isHolidayPeriod(dateText) {
   var parts = dateText.split("-");
   var month = Number(parts[1]);
@@ -575,6 +578,7 @@ function calculate(input) {
   result.weeks = [];
   var allowedHours = 0;   // sum of the limits, used in "total" mode
   var holidayWeeks = 0;
+  var partHolidayWeeks = 0;  // weeks that are part term time, part holiday
   var position = 0;       // position of the first day of the week in input.days
 
   for (var w = 0; w < weeks.length; w++) {
@@ -583,7 +587,16 @@ function calculate(input) {
     week.from = weekDays[0];
     week.to = weekDays[weekDays.length - 1];
     week.length = weekDays.length;
-    week.holiday = isHolidayPeriod(week.from);
+    // Safer rule: the 40-hour limit only applies when EVERY day of the
+    // week is in a holiday period. A week that is part term time and part
+    // holiday (for example 28 Sep to 4 Oct) keeps the 20-hour limit.
+    var holidayDays = 0;
+    for (var hd = 0; hd < weekDays.length; hd++) {
+      if (isHolidayPeriod(weekDays[hd])) { holidayDays++; }
+    }
+    week.holiday = holidayDays === weekDays.length;
+    week.partHoliday = holidayDays > 0 && !week.holiday;
+    if (week.partHoliday) { partHolidayWeeks++; }
     week.limit = week.holiday ? HOURS_HOLIDAYS : HOURS_TERM_TIME;
     if (week.holiday) { holidayWeeks++; }
 
@@ -600,6 +613,7 @@ function calculate(input) {
 
   result.holidayMix = holidayWeeks > 0 && holidayWeeks < weeks.length;
   result.allHoliday = holidayWeeks === weeks.length;
+  result.partHoliday = partHolidayWeeks > 0;
 
   if (input.mode === "daily") {
     result.weeksOver = 0;
@@ -1182,9 +1196,10 @@ function hoursLines(r) {
 
   if (r.holidayMix) {
     lines.push(t("hoursMixed"));
-  } else {
+  } else if (!r.partHoliday) {
     lines.push(r.allHoliday ? t("hoursHoliday") : t("hoursTerm"));
   }
+  if (r.partHoliday) { lines.push(t("hoursPartWeek")); }
   if (r.overHours) { lines.push(t("hoursWarning")); }
   return lines;
 }
