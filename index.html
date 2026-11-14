@@ -103,18 +103,8 @@
       <p id="dailyTotals" class="daily-totals"></p>
     </div>
 
-    <!-- The payslip details are hidden by default so the main form stays short.
-         <details> opens and closes without any JavaScript. -->
-    <details id="payslipDetails">
-    <summary data-text="detailsToggle"></summary>
-    <p class="hint" data-text="detailsHint"></p>
-
-    <!-- Other payments: Sunday premium, overtime, holiday pay, tips... Lines are created by script.js -->
-    <h3 class="deductions-title" data-text="extraPayTitle"></h3>
-    <p class="hint" data-text="extraPayHint"></p>
-    <div id="extraPayments"></div>
-    <button type="button" class="add-button" onclick="addExtra('payment')" data-text="addPayment"></button>
-
+    <!-- The four main deductions are always visible: understanding them was
+         the top need in our survey (7 of 10). -->
     <h3 class="deductions-title" data-text="deductionsTitle"></h3>
     <p class="hint" data-text="deductionsHint"></p>
     <div class="deduction-columns">
@@ -137,8 +127,20 @@
       </div>
     </div>
 
+    <!-- Extra payments and other deductions are hidden by default so the
+         form stays short. <details> opens and closes without any JavaScript. -->
+    <details id="payslipDetails">
+    <summary data-text="detailsToggle"></summary>
+    <p class="hint" data-text="detailsHint"></p>
+
+    <!-- Other payments: Sunday premium, overtime, holiday pay, tips... Lines are created by script.js -->
+    <h3 class="deductions-title" data-text="extraPayTitle"></h3>
+    <p class="hint" data-text="extraPayHint"></p>
+    <div id="extraPayments"></div>
+    <button type="button" class="add-button" onclick="addExtra('payment')" data-text="addPayment"></button>
+
     <!-- Other deductions: uniform, equipment or meals, or other -->
-    <h4 class="extra-title" data-text="extraDedTitle"></h4>
+    <h3 class="deductions-title" data-text="extraDedTitle"></h3>
     <p class="hint" data-text="extraDedHint"></p>
     <div id="extraDeductions"></div>
     <button type="button" class="add-button" onclick="addExtra('deduction')" data-text="addDeduction"></button>
